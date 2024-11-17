@@ -1,17 +1,16 @@
 {
   "dependencies": {
-    "expo": "^51.0.39",
+    "expo": "^52.0.7",
     "expo-asset": "~10.0.6",
     "expo-file-system": "~17.0.1",
     "expo-gl": "~14.0.2",
-    "expo-modules-core": "~1.12.9",
     "expo-sensors": "^13.0.9",
-    "expo-three": "^7.0.0",
+    "expo-three": "^8.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.74.5",
     "react-native-web": "~0.19.6",
-    "three": "^0.145.0"
+    "three": "^0.166.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3"

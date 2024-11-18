@@ -53,7 +53,7 @@ export default function App() {
     const renderer = new Renderer({ gl });
     renderer.setSize(width, height);
 
-    const camera = new PerspectiveCamera(75, width / height, 0.01, 1000);
+    const camera = new PerspectiveCamera(90, width / height, 0.01, 1000);
     camera.position.set(0, 0, 0); // Place the camera exactly at the center of the sphere
 
     const scene = new Scene();
@@ -80,7 +80,7 @@ export default function App() {
         const yaw = alpha - initialHeading; // Adjust yaw relative to the initial North
 
         // Apply tilt (pitch and roll)
-        const pitch = MathUtils.degToRad((beta - 90) * 60); // Pitch (beta) controls forward/backward tilt
+        const pitch = MathUtils.degToRad((beta - 90)); // Pitch (beta) controls forward/backward tilt
         const roll = MathUtils.degToRad(gamma * 60); // Roll (gamma) controls side-to-side tilt
 
         // Apply these values to the camera or the sphere
@@ -93,9 +93,9 @@ export default function App() {
         camera.quaternion.slerp(quaternion, 0.1); // Smoothly interpolate
 
         // Optional: Apply rotation directly to the sphere if you want it tilted too
-        sphere.rotation.x = pitch;
-        sphere.rotation.y = MathUtils.degToRad(yaw); // Heading controls rotation
-        sphere.rotation.z = roll;
+ //       sphere.rotation.x = pitch;
+ //       sphere.rotation.y = MathUtils.degToRad(yaw); // Heading controls rotation
+ //       sphere.rotation.z = roll;
       }
     });
 

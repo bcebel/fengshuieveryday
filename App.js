@@ -17,33 +17,32 @@ import * as THREE from "three";
 
 export default function App() {
   let timeout;
-  const [heading, setHeading] = useState(0); // State for storing the compass heading
-  const [initialHeading, setInitialHeading] = useState(null); // To store the initial heading for North
+  const [heading, setHeading] = useState(0);
+  const [initialHeading, setInitialHeading] = useState(null);
+  const [manualOffset, setManualOffset] = useState(0); // Manual adjustment for the photo's orientation
 
   useEffect(() => {
-    // Clear the animation loop and sensor listener when the component unmounts
     return () => {
       clearTimeout(timeout);
-      DeviceMotion.removeAllListeners(); // Remove DeviceMotion listener
-      Magnetometer.removeAllListeners(); // Remove Magnetometer listener
+      DeviceMotion.removeAllListeners();
+      Magnetometer.removeAllListeners();
     };
   }, []);
 
-  // Listen to the magnetometer data for the compass heading
+  // Magnetometer for compass heading
   useEffect(() => {
-    Magnetometer.setUpdateInterval(50); // Set update interval for magnetometer
+    Magnetometer.setUpdateInterval(50);
     const magnetometerListener = Magnetometer.addListener(({ x, y, z }) => {
-      const heading = Math.atan2(y, x) * (180 / Math.PI); // Convert to degrees
-      setHeading(heading); // Store heading in state
+      const heading = Math.atan2(y, x) * (180 / Math.PI);
+      setHeading(heading);
 
-      // Set initial heading on first read
       if (initialHeading === null) {
-        setInitialHeading(heading); // Set the initial heading as North
+        setInitialHeading(heading);
       }
     });
 
     return () => {
-      magnetometerListener.remove(); // Cleanup listener
+      magnetometerListener.remove();
     };
   }, [initialHeading]);
 
@@ -53,8 +52,8 @@ export default function App() {
     const renderer = new Renderer({ gl });
     renderer.setSize(width, height);
 
-    const camera = new PerspectiveCamera(90, width / height, 0.01, 1000);
-    camera.position.set(0, 0, 0); // Place the camera exactly at the center of the sphere
+    const camera = new PerspectiveCamera(140, width / height, 0.01, 1000);
+    camera.position.set(0, 0, 0);
 
     const scene = new Scene();
 
@@ -68,7 +67,6 @@ export default function App() {
     const sphere = new IconMesh();
     scene.add(sphere);
 
-    // Set DeviceMotion update interval
     DeviceMotion.setUpdateInterval(50);
 
     // Smooth rotations using quaternions and combine with compass heading
@@ -76,26 +74,27 @@ export default function App() {
       if (rotation && initialHeading !== null) {
         const { alpha, beta, gamma } = rotation;
 
-        // Calculate yaw (alpha) relative to the initial heading (adjusting for the direction of North)
-        const yaw = alpha - initialHeading; // Adjust yaw relative to the initial North
+        // Lock pitch and roll (keep them vertical)
+        const pitch = Math.max(Math.min(beta, 260), -260); // Clamp pitch within -80 to 80 degrees
+        const roll = 0; // Lock roll to 0 to prevent side-to-side tilting
 
-        // Apply tilt (pitch and roll)
-        const pitch = MathUtils.degToRad((beta - 90)); // Pitch (beta) controls forward/backward tilt
-        const roll = MathUtils.degToRad(gamma * 60); // Roll (gamma) controls side-to-side tilt
+        // Calculate yaw (alpha) relative to the initial heading
+        let yaw = alpha - initialHeading; // Initial yaw calculation
+        yaw += manualOffset; // Apply manual offset for orientation correction
+
+        // Normalize yaw to keep it within 0-360 degrees
+        if (yaw < 0) yaw += 360;
+        if (yaw >= 360) yaw -= 360;
 
         // Apply these values to the camera or the sphere
-        const x = pitch;
-        const y = MathUtils.degToRad(yaw * 60); // Yaw is adjusted by the initial heading to align with North
-        const z = roll;
-
         const quaternion = new Quaternion();
-        quaternion.setFromEuler(new THREE.Euler(x, y, z, "XYZ"));
-        camera.quaternion.slerp(quaternion, 0.1); // Smoothly interpolate
+        quaternion.setFromEuler(new THREE.Euler(pitch, yaw, roll, "XYZ"));
+        camera.quaternion.slerp(quaternion, 0.1);
 
-        // Optional: Apply rotation directly to the sphere if you want it tilted too
- //       sphere.rotation.x = pitch;
- //       sphere.rotation.y = MathUtils.degToRad(yaw); // Heading controls rotation
- //       sphere.rotation.z = roll;
+        // Optionally, apply rotation directly to the sphere as well
+        sphere.rotation.x = pitch;
+        sphere.rotation.y = MathUtils.degToRad(yaw); // Convert yaw to radians
+        sphere.rotation.z = roll;
       }
     });
 
@@ -115,15 +114,17 @@ class IconMesh extends Mesh {
     const texture = new TextureLoader().load(require("./1.jpg"));
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.x = -1; // Flip horizontally for inside view
-    texture.repeat.y = 1; // Flip vertically for correct orientation
+    texture.repeat.x = -1;
+    texture.repeat.y = 1;
 
     super(
-      new SphereGeometry(50, 32, 32), // Adjust size if necessary
+      new SphereGeometry(50, 32, 32),
       new MeshStandardMaterial({
         map: texture,
-        side: THREE.BackSide, // Inside view of the sphere
+        side: THREE.BackSide,
       })
     );
+
+    this.rotation.set(180, 180, 180); // Initial photo rotation
   }
 }

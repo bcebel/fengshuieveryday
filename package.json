@@ -10,7 +10,8 @@
     "react-dom": "18.2.0",
     "react-native": "0.74.5",
     "react-native-web": "~0.19.6",
-    "three": "^0.166.1"
+    "three": "^0.166.1",
+    "@expo/metro-runtime": "~4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3"

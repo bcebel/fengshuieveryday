@@ -75,7 +75,9 @@ export default function App() {
         const { alpha, beta, gamma } = rotation;
 
         // Lock pitch and roll (keep them vertical)
-        const pitch = Math.max(Math.min(beta, 260), -260); // Clamp pitch within -80 to 80 degrees
+        // const pitch = Math.max(Math.min(beta, 2), -2); // Clamp pitch within -80 to 80 degrees
+        const pitch = ((beta + 2) * Math.PI); // Allow pitch to be free
+
         const roll = 0; // Lock roll to 0 to prevent side-to-side tilting
 
         // Calculate yaw (alpha) relative to the initial heading
@@ -89,7 +91,7 @@ export default function App() {
         // Apply these values to the camera or the sphere
         const quaternion = new Quaternion();
         quaternion.setFromEuler(new THREE.Euler(pitch, yaw, roll, "XYZ"));
-        camera.quaternion.slerp(quaternion, 0.1);
+        camera.quaternion.slerp(quaternion, 0.15);
 
         // Optionally, apply rotation directly to the sphere as well
         sphere.rotation.x = pitch;
